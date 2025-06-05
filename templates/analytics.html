@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Fall Detection{% endblock %}
+
+{% block content %}
+<h1>Analytics</h1>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h3>Fall Detections (Last 30 Days)</h3>
+      </div>
+      <div class="card-body">
+        <div id="fallChart" style="width:100%; height:400px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>User Account Status</h3>
+      </div>
+      <div class="card-body">
+        <div id="userChart" style="width:100%; height:300px;"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Summary</h3>
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Total Users
+            <span class="badge bg-primary rounded-pill">{{ users|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Active Users
+            <span class="badge bg-success rounded-pill">{{ active_users|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Inactive Users
+            <span class="badge bg-danger rounded-pill">{{ inactive_users|length }}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Total Fall Detections
+            <span class="badge bg-warning rounded-pill">{{ detections|length }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Fall detections chart
+    const fallChart = JSON.parse('{{ fall_chart|safe }}');
+    Plotly.newPlot('fallChart', [
+      {
+        x: fallChart.x,
+        y: fallChart.y,
+        type: fallChart.type,
+        marker: {
+          color: '#0a6e6a'
+        }
+      }
+    ], {
+      title: fallChart.title,
+      xaxis: {
+        title: 'Date'
+      },
+      yaxis: {
+        title: 'Number of Detections'
+      }
+    });
+    
+    // User status chart
+    const userChart = JSON.parse('{{ user_chart|safe }}');
+    Plotly.newPlot('userChart', [
+      {
+        labels: userChart.labels,
+        values: userChart.values,
+        type: userChart.type,
+        marker: {
+          colors: ['#28a745', '#dc3545']
+        }
+      }
+    ], {
+      title: userChart.title
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Fall Detection{% endblock %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h3>User Management</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Last Login</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('update_role', user_id=user.id) }}" class="d-inline">
+                    <select name="role" class="form-select form-select-sm" onchange="this.form.submit()">
+                      <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                      <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                  </form>
+                </td>
+                <td>{{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ 'Active' if user.is_active else 'Inactive' }}</td>
+                <td>
+                  <a href="{{ url_for('test_fall', user_id=user.id) }}" class="btn btn-sm btn-warning">Test Alert</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h3>All Fall Detections</h3>
+      </div>
+      <div class="card-body">
+        {% if detections %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for detection in detections %}
+              <tr>
+                <td>{{ detection.user.username }}</td>
+                <td>{{ detection.timestamp.strftime('%Y-%m-%d') }}</td>
+                <td>{{ detection.timestamp.strftime('%H:%M:%S') }}</td>
+                <td>{{ detection.location or 'Unknown' }}</td>
+                <td>{{ detection.severity or 'Unknown' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No fall detections recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h3>Analytics</h3>
+      </div>
+      <div class="card-body">
+        <p>View detailed analytics about fall detections and user activity:</p>
+        <a href="{{ url_for('analytics') }}" class="btn btn-primary">Go to Analytics</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

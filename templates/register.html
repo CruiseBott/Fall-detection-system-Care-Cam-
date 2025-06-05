@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Fall Detection{% endblock %}
+
+{% block additional_styles %}
+.register-container {
+  max-width: 500px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.register-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #0a6e6a;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 20px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+  <h2 class="register-title">Register</h2>
+  
+  <form method="POST" action="{{ url_for('register') }}">
+    {{ form.hidden_tag() }}
+    
+    <div class="form-group">
+      {{ form.username.label(class="form-label") }}
+      {{ form.username(class="form-control") }}
+      {% for error in form.username.errors %}
+      <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    
+    <div class="form-group">
+      {{ form.email.label(class="form-label") }}
+      {{ form.email(class="form-control") }}
+      {% for error in form.email.errors %}
+      <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    
+    <div class="form-group">
+      {{ form.password.label(class="form-label") }}
+      {{ form.password(class="form-control") }}
+      {% for error in form.password.errors %}
+      <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    
+    <div class="form-group">
+      {{ form.password2.label(class="form-label") }}
+      {{ form.password2(class="form-control") }}
+      {% for error in form.password2.errors %}
+      <span class="text-danger">{{ error }}</span>
+      {% endfor %}
+    </div>
+    
+    <div class="d-grid">
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </form>
+  
+  <div class="login-link">
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fall Detection</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro" />
+  <script src="https://kit.fontawesome.com/3ccb56eddc.js" crossorigin="anonymous"></script>
+  {% extends "base.html" %}
+
+  {% block title %}Fall Detection{% endblock %}
+
+  {% block additional_styles %}
+  body {
+    width: 100%;
+    background-color: #cdf3f1;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  h1 {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  h2 {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 24px;
+    color: #333;
+  }
+
+  #video-container1, #video-container2 {
+    background-color: inherit;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 5%;
+    flex-wrap: wrap;
+  }
+
+  .Cam {
+    width: 500px;
+    height: 300px;
+  }
+
+  .image-container {
+    position: relative;
+    display: inline-block;
+    border: 3px solid #000000;
+  }
+
+  .overlay-button {
+    position: absolute;
+    top: 5%;
+    right: 4%;
+    color: black;
+    font-weight: bold;
+    border: none;
+    font-size: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: transparent;
+    opacity: inherit;
+    transition: opacity 0.3s ease;
+  }
+
+  .overlay-button:hover {
+    opacity: 1;
+  }
+
+  .dropdown {
+    display: none;
+    position: absolute;
+    color: white;
+    z-index: 1;
+    padding: 10px;
+    top: 0.7%;
+    left: 76%;
+    width: 100px;
+    opacity: inherit;
+  }
+
+  .show {
+    display: block;
+  }
+
+  .dropdown-item {
+    color: black;
+    cursor: pointer;
+  }
+
+  .dropdown-item:hover {
+    background-color: #f1f1f1;
+  }
+
+  #icon_cam {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: black;
+    font-size: 24px;
+    z-index: 10;
+  }
+
+  .button_cam {
+    display: flex;
+    margin: 20px 50px 0px 175px;
+  }
+
+  /* Add spacing between the two sections */
+  .section-header {
+    font-size: 26px;
+    text-align: center;
+    margin-top: 20px;
+    color: #333;
+  }
+
+  {% endblock %}
+  {% block content %}
+  <h1>Fall Detection System</h1>
+  
+  <!-- Video Upload Section -->
+  <h2 class="section-header">Video Footage Upload</h2>
+
+  <div id="video-container1">
+    <form id="upload-form-1" enctype="multipart/form-data">
+      <div class="image-container">
+        <i id="icon_cam" class="fa-solid fa-camera"></i>
+        <video
+          id="video-preview-1"
+          class="Cam"
+          autoplay
+          muted
+          playsinline
+          poster="https://th.bing.com/th?q=No+Camera+Icon+White+PNG&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.5&pid=InlineBlock&mkt=en-WW&cc=VN&setlang=en&adlt=strict&t=1&mw=247"
+        >
+          Your browser does not support the video tag.
+        </video>
+        <button
+          type="button"
+          class="overlay-button"
+          data-index="1"
+          onclick="toggleDropdown(1)"
+        >
+          &#x22EE;
+        </button>
+
+        <div id="dropdownMenu1" class="dropdown">
+          <label class="dropdown-item" for="file-input-1">
+            Choose File
+            <input
+              id="file-input-1"
+              style="display: none"
+              type="file"
+              name="file"
+              accept="video/*"
+              onchange="previewVideo(event, 1)"
+              required
+            />
+          </label>
+          <div class="dropdown-item" onclick="chooseIpCam(1)">
+            Choose IP Cam
+          </div>
+          <div class="dropdown-item" onclick="closeCamera(1)">Close Cam</div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- ESP Camera Stream Section -->
+  <h2 class="section-header">ESP Camera Stream</h2>
+
+  <div id="video-container2">
+    <form id="stream-form-1">
+      <div class="image-container">
+        <i id="icon_cam" class="fa-solid fa-camera"></i>
+        <video
+          id="ipcam-preview-1"
+          class="Cam"
+          autoplay
+          muted
+          playsinline
+          style="display:none;"
+        >
+          Your browser does not support the video tag.
+        </video>
+        <button
+        type="button"
+        class="overlay-button"
+        data-index="1"
+        onclick="toggleIpDropdown(1)"
+      >
+        &#x22EE;
+      </button>
+      
+      <div id="dropdownMenu1" class="dropdown">
+        <div class="dropdown-item" onclick="chooseIpCam(1)">
+          Choose IP Cam
+        </div>
+        <div class="dropdown-item" onclick="closeIpCamera(1)">
+          Close IP Cam
+        </div>
+      </div>
+      </div>
+    </form>
+  </div>
+
+  {% block scripts %}
+  <script>
+    // Dropdown logic for both file upload and IP camera
+    function toggleDropdown(index) {
+      const dropdown = document.getElementById(`dropdownMenu${index}`);
+      const button = document.querySelector(`.overlay-button[data-index='${index}']`);
+      dropdown.classList.toggle("show");
+  
+      if (dropdown.classList.contains("show")) {
+        button.style.display = "none";
+      } else {
+        button.style.display = "block";
+      }
+    }
+  
+    function toggleIpDropdown(index) {
+      const dropdown = document.getElementById(`dropdownMenu${index}`);
+      const button = document.querySelector(`.overlay-button[data-index='${index}']`);
+      dropdown.classList.toggle("show");
+  
+      if (dropdown.classList.contains("show")) {
+        button.style.display = "none";
+      } else {
+        button.style.display = "block";
+      }
+    }
+  
+    // Function for uploading video file
+    function previewVideo(event, index) {
+      const file = event.target.files[0];
+      const fileInput = document.getElementById(`file-input-${index}`);
+      const videoElement = document.getElementById(`video-preview-${index}`);
+    
+      if (file) {
+        fileInput.disabled = true;
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('camera_id', index);
+    
+        $.ajax({
+          url: '/upload',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function(response) {
+            alert(response.message);
+            
+            // Instead of using video element, replace with img for MJPEG stream
+            const container = videoElement.parentElement;
+            const img = document.createElement('img');
+            img.id = `video-preview-${index}`;
+            img.className = 'Cam';
+            img.src = `/video_feed/${index}`;
+            
+            // Replace video with img
+            container.replaceChild(img, videoElement);
+            
+            fileInput.value = "";
+            fileInput.disabled = false;
+          },
+          error: function(xhr) {
+            alert('Error: ' + xhr.responseJSON.error);
+            console.error('Error:', xhr.responseJSON.error);
+            fileInput.disabled = false;
+          }
+        });
+      } else {
+        videoElement.src = "";
+        videoElement.poster = "https://th.bing.com/th?q=No+Camera+Icon+White+PNG&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.5&pid=InlineBlock&mkt=en-WW&cc=VN&setlang=en&adlt=strict&t=1&mw=247";
+      }
+    }
+  
+    // Function for choosing IP camera stream
+    function chooseIpCam(index) {
+      const ip = prompt("Please enter the IP address of the camera:");
+      if (ip) {
+        console.log(`Camera ${index} IP Address: ${ip}`);
+        
+        // Send the IP to the server first
+        fetch("/set_ip", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ camera_id: index, ip: ip }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+          alert(data.message);
+          
+          // Get the element to replace
+          const videoElement = document.getElementById(index === 1 ? `video-preview-${index}` : `ipcam-preview-${index}`);
+          const container = videoElement.parentElement;
+          
+          // Create an img element for MJPEG stream
+          const img = document.createElement('img');
+          img.id = index === 1 ? `video-preview-${index}` : `ipcam-preview-${index}`;
+          img.className = 'Cam';
+          img.src = `/video_feed/${index}`;
+          img.style.display = "block";
+          
+          // Replace video with img
+          container.replaceChild(img, videoElement);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Error setting IP address. Please try again.");
+        });
+      }
+    }
+  
+    // Function to close IP camera feed
+    function chooseIpCam(index) {
+  const ip = prompt("Please enter the IP address of the camera:");
+  if (ip) {
+    console.log(`Camera ${index} IP Address: ${ip}`);
+
+    // Send IP to the server
+    fetch("/set_ip", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ camera_id: index, ip: ip }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      alert(data.message);
+
+      const videoElement = document.getElementById(`ipcam-preview-${index}`);
+      if (!videoElement) {
+        alert("IP camera preview element not found!");
+        return;
+      }
+
+      const container = videoElement.parentElement;
+
+      const img = document.createElement("img");
+      img.id = `ipcam-preview-${index}`;
+      img.className = "Cam";
+      img.src = `/video_feed/${index}`;
+      img.style.display = "block";
+
+      container.replaceChild(img, videoElement);
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      alert("Error setting IP address. Please try again.");
+    });
+  }
+}
+
+
+    // Close camera or file preview
+    function closeCamera(index) {
+      document.getElementById(`video-preview-${index}`).src =
+        "https://th.bing.com/th?q=No+Camera+Icon+White+PNG&w=120&h=120&c=1&rs=1&qlt=90&cb=1&dpr=1.5&pid=InlineBlock&mkt=en-WW&cc=VN&setlang=en&adlt=strict&t=1&mw=247";
+      const fileInput = document.getElementById(`file-input-${index}`);
+      fileInput.value = "";
+    }
+  </script>
+  
+  // WebSocket for real-time fall detection alerts
+  {% if current_user.is_authenticated %}
+  const socket = io();
+  
+  socket.on('connect', function() {
+    console.log('WebSocket connected');
+  });
+  
+  socket.on('fall_detection', function(data) {
+    console.log('Fall detection event received:', data);
+    document.getElementById('detection-status').style.display = 'none';
+    document.getElementById('alert-info').style.display = 'block';
+    document.getElementById('detection-time').textContent = new Date(data.timestamp).toLocaleString();
+    document.getElementById('detection-location').textContent = data.location;
+    
+    // Play alert sound if available
+    const alertSound = document.getElementById('alert-sound');
+    if (alertSound) {
+      alertSound.play();
+    }
+    
+    // Show browser notification if permitted
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Fall Detected!', {
+        body: `A fall was detected at ${data.location}`,
+        icon: '/static/img/alert-icon.png'
+      });
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+  });
+  
+  socket.on('disconnect', function() {
+    console.log('WebSocket disconnected');
+  });
+  
+  // Add a hidden audio element for alert sound
+  document.body.insertAdjacentHTML('beforeend', 
+    '<audio id="alert-sound" src="/static/sounds/alert.mp3" preload="auto"></audio>');
+  
+  // Request notification permission when page loads
+  if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+  {% endif %}
+  </script>
+  {% endblock %}
+</body>
+</html>

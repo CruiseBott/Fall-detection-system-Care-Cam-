@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Fall Detections - Fall Detection{% endblock %}
+
+{% block content %}
+<h1>Fall Detections</h1>
+
+<div class="card mt-4">
+  <div class="card-header">
+    <h3>{% if current_user.role == 'admin' %}All{% else %}Your{% endif %} Fall Detections</h3>
+  </div>
+  <div class="card-body">
+    {% if detections %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            {% if current_user.role == 'admin' %}
+            <th>User</th>
+            {% endif %}
+            <th>Date</th>
+            <th>Time</th>
+            <th>Location</th>
+            <th>Severity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for detection in detections %}
+          <tr>
+            {% if current_user.role == 'admin' %}
+            <td>{{ detection.user.username }}</td>
+            {% endif %}
+            <td>{{ detection.timestamp.strftime('%Y-%m-%d') }}</td>
+            <td>{{ detection.timestamp.strftime('%H:%M:%S') }}</td>
+            <td>{{ detection.location or 'Unknown' }}</td>
+            <td>{{ detection.severity or 'Unknown' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('fall_detections', page=pagination.prev_num) }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Previous</span>
+        </li>
+        {% endif %}
+        
+        {% for page_num in pagination.iter_pages() %}
+          {% if page_num %}
+            {% if page_num == pagination.page %}
+            <li class="page-item active">
+              <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for('fall_detections', page=page_num) }}">{{ page_num }}</a>
+            </li>
+            {% endif %}
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+        
+        {% if pagination.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('fall_detections', page=pagination.next_num) }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Next</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% else %}
+    <p>No fall detections recorded yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

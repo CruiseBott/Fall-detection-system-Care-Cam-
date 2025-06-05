@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Fall Detection{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ current_user.username }}!</h1>
+
+<div class="row mt-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Emergency Contacts</h3>
+      </div>
+      <div class="card-body">
+        {% if contacts %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Alert Channel</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for contact in contacts %}
+              <tr>
+                <td>{{ contact.name }}</td>
+                <td>{{ contact.phone_number or 'N/A' }}</td>
+                <td>{{ contact.email or 'N/A' }}</td>
+                <td>{{ contact.alert_channel }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No emergency contacts added yet.</p>
+        {% endif %}
+        <a href="{{ url_for('manage_contacts') }}" class="btn btn-primary mt-2">Manage Contacts</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h3>Recent Fall Detections</h3>
+      </div>
+      <div class="card-body">
+        {% if detections %}
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Severity</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for detection in detections %}
+              <tr>
+                <td>{{ detection.timestamp.strftime('%Y-%m-%d') }}</td>
+                <td>{{ detection.timestamp.strftime('%H:%M:%S') }}</td>
+                <td>{{ detection.location or 'Unknown' }}</td>
+                <td>{{ detection.severity or 'Unknown' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p>No fall detections recorded yet.</p>
+        {% endif %}
+        <a href="{{ url_for('fall_detections') }}" class="btn btn-primary mt-2">View All Detections</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h3>Fall Detection System</h3>
+      </div>
+      <div class="card-body">
+        <p>Use the fall detection system to monitor for falls:</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Fall Detection</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
